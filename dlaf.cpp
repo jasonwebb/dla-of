@@ -312,6 +312,7 @@ void parseArgs(int argc, char* argv[]) {
         .allow_unrecognised_options()
         .add_options()
             ("p,particles", "Number of walker particles", cxxopts::value<int>())
+            ("o,output", "Output filename", cxxopts::value<string>())
         ;
 
         auto result = options.parse(argc, argv);
@@ -319,6 +320,11 @@ void parseArgs(int argc, char* argv[]) {
         if(result.count("particles")) {
             numParticles = result["particles"].as<int>();
             cout << "Using " << numParticles << " walker particles" << endl;
+        }
+
+        if(result.count("output")) {
+            // trim `.csv` from end of string
+            filename = result["output"].as<string>();
         }
     } catch(const cxxopts::OptionException& e) {
         cout << "Error parsing options: " << e.what() << endl;
