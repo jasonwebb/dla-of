@@ -27,3 +27,23 @@ To grow large-scale (10M+ particle) DLA clusters on 3D models.
       2. Project walker coordinates onto plane of the face.
       3. Check if projected point is within face triangle. If YES, stick.
    3. Run all other particle-particle collision checks as normal.
+
+## Install
+
+**Win10**
+1. Enable the Linux sub-system: https://docs.microsoft.com/en-us/windows/wsl/install-win10
+2. Use the bash to run the commands for 
+
+**Unix-based (Mac, Linux)**
+1. Install make, boost and g++
+```
+sudo apt-get install make libboost-dev g++
+```
+2. Compile the project using the Makefile
+```
+make
+```
+3. Run the compiled application
+```
+./dlaf > output.csv
+```
