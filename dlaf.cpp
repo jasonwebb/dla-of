@@ -5,6 +5,8 @@
 #include <random>
 #include <vector>
 
+using namespace std;
+
 // using cxxopts for CLI argument parsing
 #include "cxxopts.hpp"
 
@@ -26,7 +28,7 @@ const double DefaultStickiness = 1;
 using BoostPoint = boost::geometry::model::point<
     double, D, boost::geometry::cs::cartesian>;
 
-using IndexValue = std::pair<BoostPoint, int>;
+using IndexValue = pair<BoostPoint, int>;
 
 using Index = boost::geometry::index::rtree<
     IndexValue, boost::geometry::index::linear<4>>;
@@ -60,7 +62,7 @@ public:
     }
 
     double Length() const {
-        return std::sqrt(m_X * m_X + m_Y * m_Y + m_Z * m_Z);
+        return sqrt(m_X * m_X + m_Y * m_Y + m_Z * m_Z);
     }
 
     double LengthSquared() const {
@@ -71,7 +73,7 @@ public:
         const double dx = m_X - v.m_X;
         const double dy = m_Y - v.m_Y;
         const double dz = m_Z - v.m_Z;
-        return std::sqrt(dx * dx + dy * dy + dz * dz);
+        return sqrt(dx * dx + dy * dy + dz * dz);
     }
 
     Vector Normalized() const {
@@ -109,9 +111,9 @@ Vector Lerp(const Vector &a, const Vector &b, const double d) {
 
 // Random returns a uniformly distributed random number between lo and hi
 double Random(const double lo = 0, const double hi = 1) {
-    static thread_local std::mt19937 gen(
-        std::chrono::high_resolution_clock::now().time_since_epoch().count());
-    std::uniform_real_distribution<double> dist(lo, hi);
+    static thread_local mt19937 gen(
+        chrono::high_resolution_clock::now().time_since_epoch().count());
+    uniform_real_distribution<double> dist(lo, hi);
     return dist(gen);
 }
 
@@ -163,14 +165,14 @@ public:
     // Add adds a new particle with the specified parent particle
     void Add(const Vector &p, const int parent = -1) {
         const int id = m_Points.size();
-        m_Index.insert(std::make_pair(p.ToBoost(), id));
+        m_Index.insert(make_pair(p.ToBoost(), id));
         m_Points.push_back(p);
         m_JoinAttempts.push_back(0);
-        m_BoundingRadius = std::max(
+        m_BoundingRadius = max(
             m_BoundingRadius, p.Length() + m_AttractionDistance);
-        std::cout
+        cout
             << id << "," << parent << ","
-            << p.X() << "," << p.Y() << "," << p.Z() << std::endl;
+            << p.X() << "," << p.Y() << "," << p.Z() << endl;
     }
 
     // Nearest returns the index of the particle nearest the specified point
@@ -248,7 +250,7 @@ public:
             }
 
             // move randomly
-            const double m = std::max(
+            const double m = max(
                 m_MinMoveDistance, d - m_AttractionDistance);
             p += MotionVector(p).Normalized() * m;
 
@@ -285,11 +287,11 @@ private:
     double m_BoundingRadius;
 
     // m_Points stores the final particle positions
-    std::vector<Vector> m_Points;
+    vector<Vector> m_Points;
 
     // m_JoinAttempts tracks how many times other particles have attempted to
     // join with each finalized particle
-    std::vector<int> m_JoinAttempts;
+    vector<int> m_JoinAttempts;
 
     // m_Index is the spatial index used to accelerate nearest neighbor queries
     Index m_Index;
@@ -310,10 +312,10 @@ void parseArgs(int argc, char* argv[]) {
 
         if(result.count("particles")) {
             numParticles = result["particles"].as<int>();
-            std::cout << "Using " << numParticles << " walker particles" << std::endl;
+            cout << "Using " << numParticles << " walker particles" << endl;
         }
     } catch(const cxxopts::OptionException& e) {
-        std::cout << "Error parsing options: " << e.what() << std::endl;
+        cout << "Error parsing options: " << e.what() << endl;
         exit(1);
     }
 }
@@ -334,8 +336,8 @@ int main(int argc, char* argv[]) {
     //     for (int i = 0; i < n; i++) {
     //         const double t = (double)i / n;
     //         const double a = t * 2 * M_PI;
-    //         const double x = std::cos(a) * r;
-    //         const double y = std::sin(a) * r;
+    //         const double x = cos(a) * r;
+    //         const double y = sin(a) * r;
     //         model.Add(Vector(x, y, 0));
     //     }
     // }
