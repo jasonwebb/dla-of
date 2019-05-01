@@ -59,6 +59,8 @@ make
 
 ## Usage
 
-| Flag | Long name   | Description       | Example          | Note                                           |
-|---   |---          |---                |---               |---                                             |
-| -p   | --particles | Number of walkers | `-p 10000`       | If not provided, will default to 1000000.      |
+| Flag | Long form     | Description                            | Example          | Note                                                        |
+|---   |---            |---                                     |---               |---                                                          |
+| `-p` | `--particles` | Number of walkers                      | `-p 10000`       | If not provided, will default to 1000000.                   |
+| `-o` | `--output`    | Output file name                       | `-o output.csv`  | If not provided, will default to `points.csv`.              |
+| `-i` | `--interval`  | Output point data every _n_ iterations | `-i 100`         | If not provided, will default to once at end of simulation. |

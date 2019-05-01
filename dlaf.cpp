@@ -17,8 +17,12 @@ const int DefaultNumberOfParticles = 1000000;
 int numParticles = DefaultNumberOfParticles;
 
 // output file
-string filename = "points.csv";
+string filename = "points";
 ofstream file;
+
+// interval (in iterations) that point data is outputted
+int lastOutputIteration = 0;
+int interval = numParticles - 1;
 
 // number of dimensions (must be 2 or 3)
 const int D = 2;
@@ -176,9 +180,6 @@ public:
         m_JoinAttempts.push_back(0);
         m_BoundingRadius = max(
             m_BoundingRadius, p.Length() + m_AttractionDistance);
-        file
-            << id << "," << parent << ","
-            << p.X() << "," << p.Y() << "," << p.Z() << endl;
     }
 
     // Nearest returns the index of the particle nearest the specified point
@@ -267,6 +268,17 @@ public:
         }
     }
 
+    // OutputPointData creates a new CSV file and fills it with most current point data
+    void OutputPointData(const int iteration) const {
+        file.open(filename + "-" + to_string(iteration) + ".csv");
+
+        for(auto p : m_Points) {
+            file << p.X() << "," << p.Y() << "," << p.Z() << endl;
+        }
+
+        file.close();
+    }
+
 private:
     // m_ParticleSpacing defines the distance between particles that are
     // joined together
@@ -313,18 +325,24 @@ void parseArgs(int argc, char* argv[]) {
         .add_options()
             ("p,particles", "Number of walker particles", cxxopts::value<int>())
             ("o,output", "Output filename", cxxopts::value<string>())
+            ("i,interval", "Point data capture interval", cxxopts::value<int>())
         ;
 
         auto result = options.parse(argc, argv);
 
         if(result.count("particles")) {
             numParticles = result["particles"].as<int>();
-            cout << "Using " << numParticles << " walker particles" << endl;
         }
 
         if(result.count("output")) {
-            // trim `.csv` from end of string
+            // TODO: trim `.csv` from end of string
             filename = result["output"].as<string>();
+        }
+
+        if(result.count("interval")) {
+            interval = result["interval"].as<int>();
+        } else {
+            interval = numParticles;
         }
     } catch(const cxxopts::OptionException& e) {
         cout << "Error parsing options: " << e.what() << endl;
@@ -342,8 +360,6 @@ int main(int argc, char* argv[]) {
     // add seed point(s)
     model.Add(Vector());
 
-    file.open(filename);
-
     // {
     //     const int n = 3600;
     //     const double r = 1000;
@@ -357,11 +373,15 @@ int main(int argc, char* argv[]) {
     // }
 
     // run diffusion-limited aggregation
-    for (int i = 0; i < numParticles; i++) {
+    for (int i = 1; i <= numParticles; i++) {
         model.AddParticle();
+        
+        // output current point data based on interval
+        if(i - lastOutputIteration >= interval) {
+            model.OutputPointData(i);
+            lastOutputIteration = i;
+        }
     }
-
-    file.close();
 
     return 0;
 }
