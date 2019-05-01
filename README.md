@@ -31,8 +31,8 @@ To grow large-scale (10M+ particle) DLA clusters on 3D models.
 ## Install
 
 **Win10**
-1. Enable the Linux sub-system: https://docs.microsoft.com/en-us/windows/wsl/install-win10
-2. Use the bash to run the commands for 
+1. Enable the Windows Subsystem for Linux (WSL) and install a distro (I used Ubuntu): https://docs.microsoft.com/en-us/windows/wsl/install-win10
+2. Use the Linux bash to run the install commands for Unix below.
 
 **Unix-based (Mac, Linux)**
 1. Install make, boost and g++
