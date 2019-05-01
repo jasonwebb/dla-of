@@ -25,7 +25,7 @@ int lastOutputIteration = 0;
 int interval = numParticles - 1;
 
 // number of dimensions (must be 2 or 3)
-const int D = 2;
+const int D = 3;
 
 // default parameters (documented below)
 const double DefaultParticleSpacing = 1;
