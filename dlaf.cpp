@@ -5,6 +5,13 @@
 #include <random>
 #include <vector>
 
+// using cxxopts for CLI argument parsing
+#include "cxxopts.hpp"
+
+// number of particles
+const int DefaultNumberOfParticles = 1000000;
+int numParticles = DefaultNumberOfParticles;
+
 // number of dimensions (must be 2 or 3)
 const int D = 2;
 
@@ -288,7 +295,33 @@ private:
     Index m_Index;
 };
 
-int main() {
+// Parses CLI arguments and configures simulation with what is passed
+void parseArgs(int argc, char* argv[]) {
+    try {
+        cxxopts::Options options(argv[0]);
+
+        options
+        .allow_unrecognised_options()
+        .add_options()
+            ("p,particles", "Number of walker particles", cxxopts::value<int>())
+        ;
+
+        auto result = options.parse(argc, argv);
+
+        if(result.count("particles")) {
+            numParticles = result["particles"].as<int>();
+            std::cout << "Using " << numParticles << " walker particles" << std::endl;
+        }
+    } catch(const cxxopts::OptionException& e) {
+        std::cout << "Error parsing options: " << e.what() << std::endl;
+        exit(1);
+    }
+}
+
+int main(int argc, char* argv[]) {
+    // parse the CLI arguments
+    parseArgs(argc, argv);
+
     // create the model
     Model model;
 
@@ -308,7 +341,7 @@ int main() {
     // }
 
     // run diffusion-limited aggregation
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < numParticles; i++) {
         model.AddParticle();
     }
 

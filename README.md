@@ -15,6 +15,15 @@ To grow large-scale (10M+ particle) DLA clusters on 3D models.
 - [ ] Measure performance of updated algorithm (below).
   * Based on results, look into "Dockerizing" the app and running it on AWS.
 - [ ] Implement periodic output of timestamped point data in order to create animations of growth process.
+- [ ] Implement CLI flags
+  - [ ] Particle count
+  - [ ] Output file name
+  - [ ] Frequency of point data output (in iterations)
+  - [ ] Attraction distance
+  - [ ] Particle spacing
+  - [ ] Minimum move distance
+  - [ ] Stubbornness
+  - [ ] Stickiness
 
 ## Algorithm overview
 1. Load decimated 3D model that walkers will not be allowed to cluster inside of.
@@ -47,3 +56,9 @@ make
 ```
 ./dlaf > output.csv
 ```
+
+## Usage
+
+| Flag | Long name   | Description       | Example          | Note                                           |
+|---   |---          |---                |---               |---                                             |
+| -p   | --particles | Number of walkers | `-p 10000`       | If not provided, will default to 1000000.      |
