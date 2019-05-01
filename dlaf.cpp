@@ -4,6 +4,8 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -13,6 +15,10 @@ using namespace std;
 // number of particles
 const int DefaultNumberOfParticles = 1000000;
 int numParticles = DefaultNumberOfParticles;
+
+// output file
+string filename = "points.csv";
+ofstream file;
 
 // number of dimensions (must be 2 or 3)
 const int D = 2;
@@ -170,7 +176,7 @@ public:
         m_JoinAttempts.push_back(0);
         m_BoundingRadius = max(
             m_BoundingRadius, p.Length() + m_AttractionDistance);
-        cout
+        file
             << id << "," << parent << ","
             << p.X() << "," << p.Y() << "," << p.Z() << endl;
     }
@@ -330,6 +336,8 @@ int main(int argc, char* argv[]) {
     // add seed point(s)
     model.Add(Vector());
 
+    file.open(filename);
+
     // {
     //     const int n = 3600;
     //     const double r = 1000;
@@ -346,6 +354,8 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < numParticles; i++) {
         model.AddParticle();
     }
+
+    file.close();
 
     return 0;
 }
