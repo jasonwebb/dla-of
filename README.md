@@ -4,9 +4,9 @@ Based on [dlaf](https://github.com/fogleman/dlaf) by Michael Fogleman
 To grow large-scale (10M+ particle) DLA clusters on 3D models.
 
 ## TODO
-- [ ] Port to openFrameworks, or add 3D model import to original implementation (_IN PROGRESS_)
-  * oF has [oFMesh](https://openframeworks.cc/documentation/3d/ofMesh/) built in, but doesn't play nicely with boost. Also, the toolchain kind of sucks (Visual Studio).
-  * Will be broken down more based on findings of research into oF vs vanilla C++ approach
+- [ ] Add parser for 3D models
+- [ ] Add collision detection between walkers and faces from 3D model
+- [ ] Add ability to check if walker is inside a 3D model
 - [ ] Create 3D model of cube, but with lots of sub-faces
 - [ ] Create 3D model of faces selected from sub-divided cube to serve as seed points for clusters
   * Use Meshmixer
@@ -14,16 +14,16 @@ To grow large-scale (10M+ particle) DLA clusters on 3D models.
   * Look into Embree, Mitsuba, and OSPRay
 - [ ] Measure performance of updated algorithm (below).
   * Based on results, look into "Dockerizing" the app and running it on AWS.
-- [ ] Implement periodic output of timestamped point data in order to create animations of growth process.
-- [ ] Implement CLI flags
-  - [ ] Particle count
-  - [ ] Output file name
-  - [ ] Frequency of point data output (in iterations)
-  - [ ] Attraction distance
-  - [ ] Particle spacing
-  - [ ] Minimum move distance
-  - [ ] Stubbornness
-  - [ ] Stickiness
+- [X] Implement periodic output of timestamped point data in order to create animations of growth process.
+- [X] Implement CLI flags
+  - [X] Particle count
+  - [X] Output file name
+  - [X] Frequency of point data output (in iterations)
+  - [X] Attraction distance
+  - [X] Particle spacing
+  - [X] Minimum move distance
+  - [X] Stubbornness
+  - [X] Stickiness
 
 ## Algorithm overview
 1. Load decimated 3D model that walkers will not be allowed to cluster inside of.
@@ -59,8 +59,13 @@ make
 
 ## Usage
 
-| Flag | Long form     | Description                            | Example          | Note                                                        |
-|---   |---            |---                                     |---               |---                                                          |
-| `-p` | `--particles` | Number of walkers                      | `-p 10000`       | If not provided, will default to 1000000.                   |
-| `-o` | `--output`    | Output file name                       | `-o output.csv`  | If not provided, will default to `points.csv`.              |
-| `-i` | `--interval`  | Output point data every _n_ iterations | `-i 100`         | If not provided, will default to once at end of simulation. |
+| Flag | Long form        | Description                            | Example         | Default           |
+|---   |---               |---                                     |---              |---                |
+| `-p` | `--particles`    | Number of walkers                      | `-p 10000`      | 1000000           |
+| `-o` | `--output`       | Output file name                       | `-o output.csv` | `points.csv`.     |
+| `-i` | `--interval`     | Output point data every _n_ iterations | `-i 100`        | End of simulation |
+| `-s` | `--spacing`      | Particle spacing                       | `-s 2.0`        | 1                 |
+| `-a` | `--attraction`   | Attraction distance                    | `-a 5.0`        | 3                 |
+| `-m` | `--move`         | Minimum move distance                  | `-m 2.0`        | 1                 |
+| `-b` | `--stubbornness` | Stubbornness                           | `-b 5`          | 0                 |
+| `-k` | `--stickiness`   | Stickiness                             | `-k 3`          | 1                 |

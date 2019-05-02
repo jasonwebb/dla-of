@@ -319,6 +319,11 @@ private:
     Index m_Index;
 };
 
+
+// create the model
+Model model;
+
+
 // Parses CLI arguments and configures simulation with what is passed
 void parseArgs(int argc, char* argv[]) {
     try {
@@ -330,6 +335,11 @@ void parseArgs(int argc, char* argv[]) {
             ("p,particles", "Number of walker particles", cxxopts::value<int>())
             ("o,output", "Output filename", cxxopts::value<string>())
             ("i,interval", "Point data capture interval", cxxopts::value<int>())
+            ("s,spacing", "Particle spacing", cxxopts::value<double>())
+            ("a,attraction", "Attraction distance", cxxopts::value<double>())
+            ("m,move", "Minimum move distance", cxxopts::value<double>())
+            ("b,stubbornness", "Stubbornness", cxxopts::value<int>())
+            ("k,stickiness", "Stickiness", cxxopts::value<double>())
         ;
 
         auto result = options.parse(argc, argv);
@@ -347,6 +357,26 @@ void parseArgs(int argc, char* argv[]) {
         if(result.count("interval")) {
             interval = result["interval"].as<int>();
         }
+        
+        if(result.count("spacing")) {
+            model.SetParticleSpacing(result["spacing"].as<double>());
+        }
+
+        if(result.count("attraction")) {
+            model.SetAttractionDistance(result["attraction"].as<double>());
+        }
+
+        if(result.count("move")) {
+            model.SetMinMoveDistance(result["move"].as<double>());
+        }
+
+        if(result.count("stubbornness")) {
+            model.SetStubbornness(result["stubbornness"].as<int>());
+        }
+
+        if(result.count("stickiness")) {
+            model.SetStickiness(result["stickiness"].as<double>());
+        }
     } catch(const cxxopts::OptionException& e) {
         cout << "Error parsing options: " << e.what() << endl;
         exit(1);
@@ -356,9 +386,6 @@ void parseArgs(int argc, char* argv[]) {
 int main(int argc, char* argv[]) {
     // parse the CLI arguments
     parseArgs(argc, argv);
-
-    // create the model
-    Model model;
 
     // add seed point(s)
     model.Add(Vector());
