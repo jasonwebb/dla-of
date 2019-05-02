@@ -22,7 +22,7 @@ ofstream file;
 
 // interval (in iterations) that point data is outputted
 int lastOutputIteration = 0;
-int interval = numParticles - 1;
+int interval = numParticles;
 
 // number of dimensions (must be 2 or 3)
 const int D = 3;
@@ -345,8 +345,6 @@ void parseArgs(int argc, char* argv[]) {
 
         if(result.count("interval")) {
             interval = result["interval"].as<int>();
-        } else {
-            interval = numParticles;
         }
     } catch(const cxxopts::OptionException& e) {
         cout << "Error parsing options: " << e.what() << endl;
