@@ -336,6 +336,7 @@ void parseArgs(int argc, char* argv[]) {
 
         if(result.count("particles")) {
             numParticles = result["particles"].as<int>();
+            interval = numParticles;
         }
 
         if(result.count("output")) {
