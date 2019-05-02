@@ -177,6 +177,7 @@ public:
         const int id = m_Points.size();
         m_Index.insert(make_pair(p.ToBoost(), id));
         m_Points.push_back(p);
+        m_Parents.push_back(parent);
         m_JoinAttempts.push_back(0);
         m_BoundingRadius = max(
             m_BoundingRadius, p.Length() + m_AttractionDistance);
@@ -272,8 +273,8 @@ public:
     void OutputPointData(const int iteration) const {
         file.open(filename + "-" + to_string(iteration) + ".csv");
 
-        for(auto p : m_Points) {
-            file << p.X() << "," << p.Y() << "," << p.Z() << endl;
+        for(unsigned int id = 0; id < m_Points.size(); id++) {
+            file << id << "," << m_Parents[id] << "," << m_Points[id].X() << "," << m_Points[id].Y() << "," << m_Points[id].Z() << endl;
         }
 
         file.close();
@@ -306,6 +307,9 @@ private:
 
     // m_Points stores the final particle positions
     vector<Vector> m_Points;
+
+    // m_Parents stores the parent IDs of each clustered particle
+    vector<int> m_Parents;
 
     // m_JoinAttempts tracks how many times other particles have attempted to
     // join with each finalized particle
