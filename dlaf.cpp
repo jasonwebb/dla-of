@@ -46,6 +46,7 @@ const double DefaultAttractionDistance = 3;
 const double DefaultMinMoveDistance = 1;
 const int DefaultStubbornness = 0;
 const double DefaultStickiness = 1;
+const double DefaultBoundingRadius = 0;
 
 // boost is used for its spatial index
 using BoostPoint = boost::geometry::model::point<double, D, boost::geometry::cs::cartesian>;
@@ -286,7 +287,7 @@ public:
         m_MinMoveDistance(DefaultMinMoveDistance),
         m_Stubbornness(DefaultStubbornness),
         m_Stickiness(DefaultStickiness),
-        m_BoundingRadius(0) {}
+        m_BoundingRadius(DefaultBoundingRadius) {}
 
     void SetParticleSpacing(const double a) {
         m_ParticleSpacing = a;

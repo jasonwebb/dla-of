@@ -20,7 +20,7 @@ To grow large-scale (10M+ particle) DLA clusters on 3D models.
   - [ ] "Fade" colors out based on distance from model surface
 - [ ] Measure performance of updated algorithm (below).
   - Based on results, look into "Dockerizing" the app and running it on AWS.
-- [ ] Add DefaultBoundingRadius value, with CLI option
+- [X] Add DefaultBoundingRadius value, with CLI option
 - [ ] Add progress bar, if feasible
 - [X] Implement periodic output of timestamped point data in order to create animations of growth process.
 - [X] Implement CLI flags
