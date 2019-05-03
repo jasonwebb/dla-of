@@ -7,8 +7,6 @@
 #include <string>
 #include <fstream>
 
-using namespace std;
-
 // using cxxopts for CLI argument parsing
 #include "cxxopts.hpp"
 
