@@ -12,6 +12,18 @@ using namespace std;
 // using cxxopts for CLI argument parsing
 #include "cxxopts.hpp"
 
+// using tinyobjloader for OBJ file parsing
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
+
+using namespace std;
+
+// 3D model input
+string baseModelFilename = "";
+tinyobj::attrib_t baseModelAttrib;
+vector<tinyobj::shape_t> baseModelShapes;
+vector<tinyobj::material_t> baseModelMaterials;
+
 // number of particles
 const int DefaultNumberOfParticles = 1000000;
 int numParticles = DefaultNumberOfParticles;
@@ -329,8 +341,9 @@ void ParseArgs(int argc, char* argv[]) {
         .allow_unrecognised_options()
         .add_options()
             ("p,particles", "Number of walker particles", cxxopts::value<int>())
+            ("i,input", "Input filename (.obj)", cxxopts::value<string>())
             ("o,output", "Output filename", cxxopts::value<string>())
-            ("i,interval", "Point data capture interval", cxxopts::value<int>())
+            ("n,interval", "Point data capture interval", cxxopts::value<int>())
             ("s,spacing", "Particle spacing", cxxopts::value<double>())
             ("a,attraction", "Attraction distance", cxxopts::value<double>())
             ("m,move", "Minimum move distance", cxxopts::value<double>())
@@ -344,6 +357,16 @@ void ParseArgs(int argc, char* argv[]) {
         if(result.count("particles")) {
             numParticles = result["particles"].as<int>();
             interval = numParticles;
+        }
+
+        if(result.count("input")) {
+            baseModelFilename = result["input"].as<string>();
+            
+            // throw error when filename doesn't end in `.obj`
+            if(baseModelFilename.substr(baseModelFilename.length() - 4, baseModelFilename.length() - 1).compare(".obj") != 0) {
+                cerr << "Base model file must be an OBJ file" << endl;
+                exit(1);
+            }
         }
 
         if(result.count("output")) {
@@ -384,11 +407,36 @@ void ParseArgs(int argc, char* argv[]) {
     }
 }
 
+// LoadBaseModel loads the 3D model passed with the `-i` option
+void LoadBaseModel() {
+    string warn;
+    string err;
+
+    bool ret = tinyobj::LoadObj(&baseModelAttrib, &baseModelShapes, &baseModelMaterials, &warn, &err, baseModelFilename.c_str());
+
+    if (!warn.empty()) {
+        cout << warn << endl;
+    }
+
+    if (!err.empty()) {
+        cerr << err << endl;
+    }
+
+    if (!ret) {
+        exit(1);
+    }
+}
+
 int main(int argc, char* argv[]) {
     // parse the CLI arguments
     ParseArgs(argc, argv);
 
-    // add seed point(s)
+    // load the bounding model
+    if(!baseModelFilename.empty()) {
+        LoadBaseModel();
+    }
+
+    // add seed point at origin (a single point is necessary for now)
     model.Add(Vector());
 
     // {

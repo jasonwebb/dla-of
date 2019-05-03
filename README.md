@@ -4,7 +4,7 @@ Based on [dlaf](https://github.com/fogleman/dlaf) by Michael Fogleman
 To grow large-scale (10M+ particle) DLA clusters on 3D models.
 
 ## TODO
-- [ ] Add parser for 3D models
+- [X] Add parser for 3D models
 - [ ] Add collision detection between walkers and faces from 3D model
 - [ ] Add ability to check if walker is inside a 3D model
 - [ ] Create 3D model of cube, but with lots of sub-faces
@@ -63,8 +63,9 @@ make
 | Flag | Long form        | Description                            | Example         | Default           |
 |---   |---               |---                                     |---              |---                |
 | `-p` | `--particles`    | Number of walkers                      | `-p 10000`      | 1000000           |
+| `-i` | `--input`        | Input 3D model file name               | `-i cube.obj`   | _None_            |
 | `-o` | `--output`       | Output file name                       | `-o output.csv` | `points.csv`.     |
-| `-i` | `--interval`     | Output point data every _n_ iterations | `-i 100`        | End of simulation |
+| `-n` | `--interval`     | Output point data every _n_ iterations | `-n 100`        | End of simulation |
 | `-s` | `--spacing`      | Particle spacing                       | `-s 2.0`        | 1                 |
 | `-a` | `--attraction`   | Attraction distance                    | `-a 5.0`        | 3                 |
 | `-m` | `--move`         | Minimum move distance                  | `-m 2.0`        | 1                 |
