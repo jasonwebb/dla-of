@@ -1,19 +1,27 @@
+# dlaf with models
+
 Based on [dlaf](https://github.com/fogleman/dlaf) by Michael Fogleman
 
 ## Goal
 To grow large-scale (10M+ particle) DLA clusters on 3D models.
 
 ## TODO
-- [X] Add parser for 3D models
+- [ ] Rename repo (dlaf-on-models, dlaf-with-models, dlaf-for-models)
+- [X] Add parser for 3D models ([tinyobjloader](https://github.com/syoyo/tinyobjloader))
 - [ ] Add collision detection between walkers and faces from 3D model
 - [X] Add ability to check if walker is inside a 3D model
 - [ ] Create 3D model of cube, but with lots of sub-faces
 - [ ] Create 3D model of faces selected from sub-divided cube to serve as seed points for clusters
-  * Use Meshmixer
+  - Use Meshmixer
 - [ ] Work out rendering pipeline.
-  * Look into Embree, Mitsuba, and OSPRay
+  - Look into Embree, Mitsuba, and OSPRay
+  - Look into higher-level interfaces like Houdini
+- [ ] Output color values for points based on mesh
+  - [ ] "Fade" colors out based on distance from model surface
 - [ ] Measure performance of updated algorithm (below).
-  * Based on results, look into "Dockerizing" the app and running it on AWS.
+  - Based on results, look into "Dockerizing" the app and running it on AWS.
+- [ ] Add DefaultBoundingRadius value, with CLI option
+- [ ] Add progress bar, if feasible
 - [X] Implement periodic output of timestamped point data in order to create animations of growth process.
 - [X] Implement CLI flags
   - [X] Particle count
@@ -55,10 +63,11 @@ make
 ```
 3. Run the compiled application
 ```
-./dlaf > output.csv
+./dlaf
 ```
 
 ## Usage
+The following arguments are available for configuring the simulation to your liking:
 
 | Flag | Long form        | Description                            | Example         | Default           |
 |---   |---               |---                                     |---              |---                |
@@ -71,4 +80,20 @@ make
 | `-m` | `--move`         | Minimum move distance                  | `-m 2.0`        | 1                 |
 | `-b` | `--stubbornness` | Stubbornness                           | `-b 5`          | 0                 |
 | `-k` | `--stickiness`   | Stickiness                             | `-k 3`          | 1                 |
-| `-r` | `--radius`       | Initial bounding radius                | `-r 10.0`       | 0                 |
+| `-r` | `--radius`       | Initial bounding radius                | `-r 10.0`      | 0                 |kv
+
+### Examples
+Use 1000 particles and output a CSV file every 10 iterations.
+```
+./dlaf -p 1000 -n 10
+```
+
+Use default particle count and output to custom CSV file
+```
+./dlaf -o output.csv
+```
+
+Use custom particle count and tweak several simulation parameters in various forms
+```
+./dlaf -p 50000 -s 5.0 --stickiness 4 -a 10.0
+```
