@@ -10,7 +10,7 @@ To grow large-scale (10M+ particle) DLA clusters on 3D models.
 - [X] Add parser for 3D models ([tinyobjloader](https://github.com/syoyo/tinyobjloader))
 - [ ] Add collision detection between walkers and faces from 3D model
 - [X] Add ability to check if walker is inside a 3D model
-- [ ] Create 3D model of cube, but with lots of sub-faces
+- [ ] Create 3D model of cube
 - [ ] Create 3D model of faces selected from sub-divided cube to serve as seed points for clusters
   - Use Meshmixer
 - [ ] Work out rendering pipeline.
@@ -21,7 +21,7 @@ To grow large-scale (10M+ particle) DLA clusters on 3D models.
 - [ ] Measure performance of updated algorithm (below).
   - Based on results, look into "Dockerizing" the app and running it on AWS.
 - [X] Add DefaultBoundingRadius value, with CLI option
-- [ ] Add progress bar, if feasible
+- [X] Add progress bar, if feasible
 - [X] Implement periodic output of timestamped point data in order to create animations of growth process.
 - [X] Implement CLI flags
   - [X] Particle count
@@ -52,10 +52,10 @@ To grow large-scale (10M+ particle) DLA clusters on 3D models.
 1. Enable the Windows Subsystem for Linux (WSL) and install a distro (I used Ubuntu): https://docs.microsoft.com/en-us/windows/wsl/install-win10
 2. Use the Linux bash to run the install commands for Unix below.
 
-**Unix-based (Mac, Linux)**
+**Unix/Linux**
 1. Install make, boost and g++
 ```
-sudo apt-get install make libboost-dev g++
+sudo apt install make libboost-dev g++
 ```
 2. Compile the project using the Makefile
 ```
@@ -67,20 +67,25 @@ make
 ```
 
 ## Usage
+### Input 3D model
+
+### Selected faces 3D model
+
+### CLI options
 The following arguments are available for configuring the simulation to your liking:
 
 | Flag | Long form        | Description                            | Example         | Default           |
 |---   |---               |---                                     |---              |---                |
 | `-p` | `--particles`    | Number of walkers                      | `-p 10000`      | 1000000           |
 | `-i` | `--input`        | Input 3D model file name               | `-i cube.obj`   | _None_            |
-| `-o` | `--output`       | Output file name                       | `-o output.csv` | `points.csv`.     |
+| `-o` | `--output`       | Output file name                       | `-o output.csv` | `points.csv`      |
 | `-n` | `--interval`     | Output point data every _n_ iterations | `-n 100`        | End of simulation |
 | `-s` | `--spacing`      | Particle spacing                       | `-s 2.0`        | 1                 |
 | `-a` | `--attraction`   | Attraction distance                    | `-a 5.0`        | 3                 |
 | `-m` | `--move`         | Minimum move distance                  | `-m 2.0`        | 1                 |
 | `-b` | `--stubbornness` | Stubbornness                           | `-b 5`          | 0                 |
 | `-k` | `--stickiness`   | Stickiness                             | `-k 3`          | 1                 |
-| `-r` | `--radius`       | Initial bounding radius                | `-r 10.0`      | 0                 |kv
+| `-r` | `--radius`       | Initial bounding radius                | `-r 10.0`       | 0                 |
 
 ### Examples
 Use 1000 particles and output a CSV file every 10 iterations.

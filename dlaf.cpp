@@ -13,7 +13,6 @@ using namespace std;
 #include "cxxopts.hpp"
 
 // using prakhar1989's ProgressBar for CLI progress indicator
-// see https://github.com/prakhar1989/progress-cpp
 #include "ProgressBar.hpp"
 
 // using tinyobjloader for OBJ file parsing
@@ -23,11 +22,17 @@ using namespace std;
 
 using namespace std;
 
-// 3D model input
-string baseModelFilename = "";
-tinyobj::attrib_t baseModelAttrib;
-vector<tinyobj::shape_t> baseModelShapes;
-vector<tinyobj::material_t> baseModelMaterials;
+// full 3D model to inhibit growth
+string fullModelFilename = "";
+tinyobj::attrib_t fullModelAttrib;
+vector<tinyobj::shape_t> fullModelShapes;
+vector<tinyobj::material_t> fullModelMaterials;
+
+// 3D model of selected faces to seed growth
+string seedModelFilename = "";
+tinyobj::attrib_t seedModelAttrib;
+vector<tinyobj::shape_t> seedModelShapes;
+vector<tinyobj::material_t> seedModelMaterials;
 
 // number of particles
 const int DefaultNumberOfParticles = 1000000;
@@ -236,7 +241,7 @@ bool IsIntersectingFace(const Vector &V1, const Vector &V2, const Vector &V3, co
 // Adapted from Amnon Owed's ofxPointInMesh::isInside: https://github.com/AmnonOwed/ofxPointInMesh
 bool IsInsideMesh(Vector &p) {
     // if no mesh was provided, skip this test
-    if(baseModelFilename.empty()) {
+    if(fullModelFilename.empty()) {
         return false;
     }
 
@@ -245,20 +250,20 @@ bool IsInsideMesh(Vector &p) {
 	Vector randomDirection = Vector(0.1, 0.2, 0.3); // a random direction
 
     // go over all the shapes in the mesh
-    for (size_t s = 0; s < baseModelShapes.size(); s++) {
+    for (size_t s = 0; s < fullModelShapes.size(); s++) {
         size_t index_offset = 0;
 
         // go over all the faces in the shape
-        for (size_t f = 0; f < baseModelShapes[s].mesh.num_face_vertices.size(); f++) {
-            unsigned int fv = baseModelShapes[s].mesh.num_face_vertices[f];
+        for (size_t f = 0; f < fullModelShapes[s].mesh.num_face_vertices.size(); f++) {
+            unsigned int fv = fullModelShapes[s].mesh.num_face_vertices[f];
             vector<Vector> vertices;
 
             // collect the vertices
             for (size_t v = 0; v < fv; v++) {
-                tinyobj::index_t idx = baseModelShapes[s].mesh.indices[index_offset + v];
-                tinyobj::real_t vx = baseModelAttrib.vertices[3*idx.vertex_index+0];
-                tinyobj::real_t vy = baseModelAttrib.vertices[3*idx.vertex_index+1];
-                tinyobj::real_t vz = baseModelAttrib.vertices[3*idx.vertex_index+2];
+                tinyobj::index_t idx = fullModelShapes[s].mesh.indices[index_offset + v];
+                tinyobj::real_t vx = fullModelAttrib.vertices[3*idx.vertex_index+0];
+                tinyobj::real_t vy = fullModelAttrib.vertices[3*idx.vertex_index+1];
+                tinyobj::real_t vz = fullModelAttrib.vertices[3*idx.vertex_index+2];
                 vertices.push_back(Vector(vx, vy, vz));
             }
 
@@ -283,6 +288,58 @@ bool IsInsideMesh(Vector &p) {
 	} else {
 		return false;
 	}
+}
+
+// GetDot2 calculates the dot product of a vector with itself
+double GetDot2(const Vector &p) {
+    return p.GetDot(p);
+}
+
+// GetSign returns -1 for negative numbers, 1 for positive numbers, and 0 for 0
+int GetSign(const double &v) {
+    int result = 0;
+    if(v < 0) {
+        result = -1;
+    } else if(v > 0) {
+        result = 1;
+    }
+    return result;
+}
+
+// clamp ensures that a value (x) is within the range defined by [lower] and [upper]
+double clamp(double x, double lower, double upper) {
+    return min(upper, max(x, lower));
+}
+
+// DistanceToTriangle calculates the shortest distance between a point (p) and a 3D triangle defined by vertices v1, v2, and v3
+// Adapted from: https://iquilezles.org/www/articles/triangledistance/triangledistance.htm
+double DistanceToTriangle(const Vector &v1, const Vector &v2, const Vector &v3, const Vector &p) {
+    Vector v21 = v2 - v1;
+    Vector v32 = v3 - v2;
+    Vector v13 = v1 - v3;
+    Vector p1 = p - v1;
+    Vector p2 = p - v2;
+    Vector p3 = p - p3;
+    Vector nor = v21.GetCrossed(v13);
+
+    return sqrt(
+        // inside/outside test
+        (GetSign(p1.GetDot(v21.GetCrossed(nor))) +
+         GetSign(p2.GetDot(v32.GetCrossed(nor))) +
+         GetSign(p3.GetDot(v13.GetCrossed(nor))) < 2.0)
+        ?
+        // 3 edges
+        min( 
+            min( 
+                GetDot2(v21 * clamp(p1.GetDot(v21) / GetDot2(v21), 0.0, 1.0) - p1),
+                GetDot2(v32 * clamp(p2.GetDot(v32) / GetDot2(v32), 0.0, 1.0) - p2)
+            ),
+            GetDot2(v13 * clamp(p3.GetDot(v13) / GetDot2(v13), 0.0, 1.0) - p3)
+        )
+        :
+        // 1 face
+        p1.GetDot(nor) * p1.GetDot(nor) / GetDot2(nor)
+    );
 }
 
 // Model holds all of the particles and defines their behavior.
@@ -350,6 +407,39 @@ public:
         return result;
     }
 
+    // DistanceToNearestFace calculates the shortest distance from a particle (p) and 
+    // TODO: if needed, consider putting mesh vertices in spatial index, then doing knn search search within radius defined by largest edge found in mesh (precomputed)
+    double DistanceToNearestFace(const Vector &p) {
+        double distance = m_AttractionDistance;
+
+        // go over all the shapes in the mesh
+        for (size_t s = 0; s < seedModelShapes.size(); s++) {
+            size_t index_offset = 0;
+
+            // go over all the faces in the shape
+            for (size_t f = 0; f < seedModelShapes[s].mesh.num_face_vertices.size(); f++) {
+                unsigned int fv = seedModelShapes[s].mesh.num_face_vertices[f];
+                vector<Vector> vertices;
+
+                // collect the vertices
+                for (size_t v = 0; v < fv; v++) {
+                    tinyobj::index_t idx = seedModelShapes[s].mesh.indices[index_offset + v];
+                    tinyobj::real_t vx = seedModelAttrib.vertices[3*idx.vertex_index+0];
+                    tinyobj::real_t vy = seedModelAttrib.vertices[3*idx.vertex_index+1];
+                    tinyobj::real_t vz = seedModelAttrib.vertices[3*idx.vertex_index+2];
+                    vertices.push_back(Vector(vx, vy, vz));
+                }
+
+                index_offset += fv;
+
+                // calculate distance from point to face
+                distance = min(distance, DistanceToTriangle(vertices[0], vertices[1], vertices[2], p));
+            }
+        }
+
+        return distance;
+    }
+
     // RandomStartingPosition returns a random point to start a new particle
     Vector RandomStartingPosition() const {
         const double d = m_BoundingRadius;
@@ -398,7 +488,7 @@ public:
 
             // do not allow particle to stick when its inside of the base model mesh
             if(!IsInsideMesh(p)) {
-                // check if close enough to join
+                // check for particle-particle collisions
                 if (d < m_AttractionDistance) {
                     if (!ShouldJoin(p, parent)) {
                         // push particle away a bit
@@ -411,6 +501,15 @@ public:
 
                     // add the point
                     Add(p, parent);
+                    return;
+                }
+
+                // get distance to the nearest seed face
+                const double df = DistanceToNearestFace(p);
+
+                // check for particle-face collisions
+                if (df < m_AttractionDistance) {
+                    Add(p, -1);
                     return;
                 }
             }
@@ -490,7 +589,8 @@ void ParseArgs(int argc, char* argv[]) {
         .allow_unrecognised_options()
         .add_options()
             ("p,particles", "Number of walker particles", cxxopts::value<int>())
-            ("i,input", "Input filename (.obj)", cxxopts::value<string>())
+            ("i,input", "Full 3D model filename (.obj)", cxxopts::value<string>())
+            ("f,seed", "Seed faces 3D model filename (.obj)", cxxopts::value<string>())
             ("o,output", "Output filename", cxxopts::value<string>())
             ("n,interval", "Point data capture interval", cxxopts::value<int>())
             ("s,spacing", "Particle spacing", cxxopts::value<double>())
@@ -510,11 +610,21 @@ void ParseArgs(int argc, char* argv[]) {
         }
 
         if(result.count("input")) {
-            baseModelFilename = result["input"].as<string>();
+            fullModelFilename = result["input"].as<string>();
             
             // throw error when filename doesn't end in `.obj`
-            if(baseModelFilename.substr(baseModelFilename.length() - 4, baseModelFilename.length() - 1).compare(".obj") != 0) {
+            if(fullModelFilename.substr(fullModelFilename.length() - 4, fullModelFilename.length() - 1).compare(".obj") != 0) {
                 cerr << "Base model file must be an OBJ file" << endl;
+                exit(1);
+            }
+        }
+
+        if(result.count("seed")) {
+            seedModelFilename = result["seed"].as<string>();
+            
+            // throw error when filename doesn't end in `.obj`
+            if(seedModelFilename.substr(seedModelFilename.length() - 4, seedModelFilename.length() - 1).compare(".obj") != 0) {
+                cerr << "Seed model file must be an OBJ file" << endl;
                 exit(1);
             }
         }
@@ -528,7 +638,7 @@ void ParseArgs(int argc, char* argv[]) {
                 exit(1);
             }
 
-            // // trim the `.csv` extension (it'll be added by OutputPointData later)
+            // trim the `.csv` extension (it'll be added by OutputPointData later)
             for(int i = 0; i < 4; i++) {
                 filename.pop_back();
             }
@@ -567,12 +677,32 @@ void ParseArgs(int argc, char* argv[]) {
     }
 }
 
-// LoadBaseModel loads the 3D model passed with the `-i` option
-void LoadBaseModel() {
+// LoadFullModel loads the 3D model passed with the `-i` option
+void LoadFullModel() {
     string warn;
     string err;
 
-    bool ret = tinyobj::LoadObj(&baseModelAttrib, &baseModelShapes, &baseModelMaterials, &warn, &err, baseModelFilename.c_str());
+    bool ret = tinyobj::LoadObj(&fullModelAttrib, &fullModelShapes, &fullModelMaterials, &warn, &err, fullModelFilename.c_str());
+
+    if (!warn.empty()) {
+        cout << warn << endl;
+    }
+
+    if (!err.empty()) {
+        cerr << err << endl;
+    }
+
+    if (!ret) {
+        exit(1);
+    }
+}
+
+// LoadSeedModel loads the 3D model passed with the `-f` option
+void LoadSeedModel() {
+    string warn;
+    string err;
+
+    bool ret = tinyobj::LoadObj(&seedModelAttrib, &seedModelShapes, &seedModelMaterials, &warn, &err, seedModelFilename.c_str());
 
     if (!warn.empty()) {
         cout << warn << endl;
@@ -591,9 +721,14 @@ int main(int argc, char* argv[]) {
     // parse the CLI arguments
     ParseArgs(argc, argv);
 
-    // load the bounding model
-    if(!baseModelFilename.empty()) {
-        LoadBaseModel();
+    // load the full 3D model for inhibiting growth
+    if(!fullModelFilename.empty()) {
+        LoadFullModel();
+    }
+
+    // load the seed faces 3D model
+    if(!seedModelFilename.empty()) {
+        LoadSeedModel();
     }
 
     // add seed point at origin (a single point is necessary for now)
