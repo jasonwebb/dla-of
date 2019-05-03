@@ -24,6 +24,7 @@ To grow large-scale (10M+ particle) DLA clusters on 3D models.
   - [X] Minimum move distance
   - [X] Stubbornness
   - [X] Stickiness
+  - [X] Bounding radius
 
 ## Algorithm overview
 1. Load decimated 3D model that walkers will not be allowed to cluster inside of.
@@ -69,3 +70,4 @@ make
 | `-m` | `--move`         | Minimum move distance                  | `-m 2.0`        | 1                 |
 | `-b` | `--stubbornness` | Stubbornness                           | `-b 5`          | 0                 |
 | `-k` | `--stickiness`   | Stickiness                             | `-k 3`          | 1                 |
+| `-r` | `--radius`       | Initial bounding radius                | `-r 10.0`       | 0                 |

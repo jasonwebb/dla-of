@@ -167,6 +167,10 @@ public:
         m_Stickiness = a;
     }
 
+    void SetBoundingRadius(const double a) {
+        m_BoundingRadius = a;
+    }
+
     // Add adds a new particle with the specified parent particle
     void Add(const Vector &p, const int parent = -1) {
         const int id = m_Points.size();
@@ -332,6 +336,7 @@ void parseArgs(int argc, char* argv[]) {
             ("m,move", "Minimum move distance", cxxopts::value<double>())
             ("b,stubbornness", "Stubbornness", cxxopts::value<int>())
             ("k,stickiness", "Stickiness", cxxopts::value<double>())
+            ("r,radius", "Initial bounding radius", cxxopts::value<double>())
         ;
 
         auto result = options.parse(argc, argv);
@@ -368,6 +373,10 @@ void parseArgs(int argc, char* argv[]) {
 
         if(result.count("stickiness")) {
             model.SetStickiness(result["stickiness"].as<double>());
+        }
+
+        if(result.count("radius")) {
+            model.SetBoundingRadius(result["radius"].as<double>());
         }
     } catch(const cxxopts::OptionException& e) {
         cout << "Error parsing options: " << e.what() << endl;
