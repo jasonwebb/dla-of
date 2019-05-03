@@ -8,9 +8,9 @@ To grow large-scale (10M+ particle) DLA clusters on 3D models.
 ## TODO
 - [ ] Rename repo (dlaf-on-models, dlaf-with-models, dlaf-for-models)
 - [X] Add parser for 3D models ([tinyobjloader](https://github.com/syoyo/tinyobjloader))
-- [ ] Add collision detection between walkers and faces from 3D model
+- [X] Add collision detection between walkers and faces from 3D model
 - [X] Add ability to check if walker is inside a 3D model
-- [ ] Create 3D model of cube
+- [X] Create 3D model of cube
 - [ ] Create 3D model of faces selected from sub-divided cube to serve as seed points for clusters
   - Use Meshmixer
 - [ ] Work out rendering pipeline.
@@ -67,9 +67,18 @@ make
 ```
 
 ## Usage
-### Input 3D model
+### Base 3D model
+A 3D model can be provided to the application to inhibit the growth of particles. This may allow particle clusters to spread across the surface of the model given the right parameters.
+
+* Model must be in the `.obj` format
+* Model should be manifold (no holes). Use Meshmixer or similar to repair it, if needed.
+* Keep triangle count low to improve performance. A ray is cast from every walker to every face to determine if it's inside or outside, so fewer triangles means fewer computations.
 
 ### Selected faces 3D model
+Another 3D model containing only some of the faces of the previous 3D model can be provided to serve as "seed" points for particle clusters. Collision detection is run for each walker against each face in this model so that clusters can be spawn when particles collide with them, even if no other clustered particles are there. 
+
+* Model must be in the `.obj` format
+* Model does not need to be manifold.
 
 ### CLI options
 The following arguments are available for configuring the simulation to your liking:
@@ -77,7 +86,8 @@ The following arguments are available for configuring the simulation to your lik
 | Flag | Long form        | Description                            | Example         | Default           |
 |---   |---               |---                                     |---              |---                |
 | `-p` | `--particles`    | Number of walkers                      | `-p 10000`      | 1000000           |
-| `-i` | `--input`        | Input 3D model file name               | `-i cube.obj`   | _None_            |
+| `-i` | `--input`        | Filename of base 3D model              | `-i cube.obj`   | _None_            |
+| `-f` | `--faces`        | Filename of 3D model with seed faces   | `-f faces.obj`  | _None_            |
 | `-o` | `--output`       | Output file name                       | `-o output.csv` | `points.csv`      |
 | `-n` | `--interval`     | Output point data every _n_ iterations | `-n 100`        | End of simulation |
 | `-s` | `--spacing`      | Particle spacing                       | `-s 2.0`        | 1                 |
@@ -101,4 +111,9 @@ Use default particle count and output to custom CSV file
 Use custom particle count and tweak several simulation parameters in various forms
 ```
 ./dlaf -p 50000 -s 5.0 --stickiness 4 -a 10.0
+```
+
+Use one 3D model to inhibit growth (`-i`) and another containing faces to seed cluster growth (`-f`). Note that you will probably want to increase the initial size of the bounding radius (`-r`) to be at least as large as these models.
+```
+./dlaf -i base.obj -f faces.obj -r 400.0
 ```
