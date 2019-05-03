@@ -12,6 +12,10 @@ using namespace std;
 // using cxxopts for CLI argument parsing
 #include "cxxopts.hpp"
 
+// using prakhar1989's ProgressBar for CLI progress indicator
+// see https://github.com/prakhar1989/progress-cpp
+#include "ProgressBar.hpp"
+
 // using tinyobjloader for OBJ file parsing
 #define TINYOBJLOADER_IMPLEMENTATION
 #define EPSILON 0.00000001
@@ -28,6 +32,9 @@ vector<tinyobj::material_t> baseModelMaterials;
 // number of particles
 const int DefaultNumberOfParticles = 1000000;
 int numParticles = DefaultNumberOfParticles;
+
+// progress bar
+ProgressBar progressBar(numParticles, 40);
 
 // output file
 string filename = "points";
@@ -321,6 +328,15 @@ public:
         m_Parents.push_back(parent);
         m_JoinAttempts.push_back(0);
         m_BoundingRadius = max(m_BoundingRadius, p.Length() + m_AttractionDistance);
+
+        // update and display progress bar
+        ++progressBar;
+        progressBar.display();
+
+        // wrap up the progress bar when last particle is placed
+        if(id == numParticles) {
+            progressBar.done();
+        }
     }
 
     // Nearest returns the index of the particle nearest the specified point
@@ -490,6 +506,7 @@ void ParseArgs(int argc, char* argv[]) {
         if(result.count("particles")) {
             numParticles = result["particles"].as<int>();
             interval = numParticles;
+            progressBar.setTotal(numParticles);
         }
 
         if(result.count("input")) {
