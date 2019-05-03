@@ -370,8 +370,18 @@ void ParseArgs(int argc, char* argv[]) {
         }
 
         if(result.count("output")) {
-            // TODO: trim `.csv` from end of string
             filename = result["output"].as<string>();
+
+            // throw error when filename doesn't end in `.csv`
+            if(filename.substr(filename.length() - 4, filename.length() - 1).compare(".csv") != 0) {
+                cerr << "Output file must be a CSV file" << endl;
+                exit(1);
+            }
+
+            // // trim the `.csv` extension (it'll be added by OutputPointData later)
+            for(int i = 0; i < 4; i++) {
+                filename.pop_back();
+            }
         }
 
         if(result.count("interval")) {
