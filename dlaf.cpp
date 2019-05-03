@@ -590,7 +590,7 @@ void ParseArgs(int argc, char* argv[]) {
         .add_options()
             ("p,particles", "Number of walker particles", cxxopts::value<int>())
             ("i,input", "Full 3D model filename (.obj)", cxxopts::value<string>())
-            ("f,seed", "Seed faces 3D model filename (.obj)", cxxopts::value<string>())
+            ("f,faces", "Seed faces 3D model filename (.obj)", cxxopts::value<string>())
             ("o,output", "Output filename", cxxopts::value<string>())
             ("n,interval", "Point data capture interval", cxxopts::value<int>())
             ("s,spacing", "Particle spacing", cxxopts::value<double>())
@@ -619,8 +619,8 @@ void ParseArgs(int argc, char* argv[]) {
             }
         }
 
-        if(result.count("seed")) {
-            seedModelFilename = result["seed"].as<string>();
+        if(result.count("faces")) {
+            seedModelFilename = result["faces"].as<string>();
             
             // throw error when filename doesn't end in `.obj`
             if(seedModelFilename.substr(seedModelFilename.length() - 4, seedModelFilename.length() - 1).compare(".obj") != 0) {
