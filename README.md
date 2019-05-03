@@ -6,7 +6,7 @@ To grow large-scale (10M+ particle) DLA clusters on 3D models.
 ## TODO
 - [X] Add parser for 3D models
 - [ ] Add collision detection between walkers and faces from 3D model
-- [ ] Add ability to check if walker is inside a 3D model
+- [X] Add ability to check if walker is inside a 3D model
 - [ ] Create 3D model of cube, but with lots of sub-faces
 - [ ] Create 3D model of faces selected from sub-divided cube to serve as seed points for clusters
   * Use Meshmixer

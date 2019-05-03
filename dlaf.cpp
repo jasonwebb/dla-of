@@ -14,6 +14,7 @@ using namespace std;
 
 // using tinyobjloader for OBJ file parsing
 #define TINYOBJLOADER_IMPLEMENTATION
+#define EPSILON 0.00000001
 #include "tiny_obj_loader.h"
 
 using namespace std;
@@ -99,6 +100,18 @@ public:
         return Vector(m_X * m, m_Y * m, m_Z * m);
     }
 
+    Vector GetCrossed(const Vector &v) const {
+        return Vector(m_Y * v.m_Z - m_Z * v.m_Y, 
+                      m_Z * v.m_X - m_X * v.m_Z,
+                      m_X * v.m_Y - m_Y * v.m_X);
+    }
+
+    double GetDot(const Vector &v) const {
+        return m_X * v.m_X +
+               m_Y * v.m_Y +
+               m_Z * v.m_Z;
+    }
+
     Vector operator+(const Vector &v) const {
         return Vector(m_X + v.m_X, m_Y + v.m_Y, m_Z + v.m_Z);
     }
@@ -114,6 +127,10 @@ public:
     Vector &operator+=(const Vector &v) {
         m_X += v.m_X; m_Y += v.m_Y; m_Z += v.m_Z;
         return *this;
+    }
+
+    bool operator==(const Vector &v) const {
+        return m_X == v.m_X && m_Y == v.m_Y && m_Z == v.m_Z;
     }
 
 private:
@@ -146,6 +163,118 @@ Vector RandomInUnitSphere() {
             return p;
         }
     }
+}
+
+// IsIntersectingFace checks for intersection of a ray (O) with random direction (D) and a triangle face defined by vertices V1, V2, and V3
+// Adapted from Amnon Owed's ofxPointInMesh::triangleIntersection: https://github.com/AmnonOwed/ofxPointInMesh
+// Uses Möller–Trumbore: http://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
+bool IsIntersectingFace(const Vector &V1, const Vector &V2, const Vector &V3, const Vector &O, const Vector &D, Vector &R) {
+	Vector e1, e2; // Edge1, Edge2
+	Vector P, Q, T;
+	float det, inv_det, u, v;
+	float t;
+
+	// Find vectors for two edges sharing V1
+	e1 = V2 - V1;
+	e2 = V3 - V1;
+
+	// Begin calculating determinant - also used to calculate u parameter
+	P = D.GetCrossed(e2);
+
+	// if determinant is near zero, ray lies in plane of triangle
+	det = e1.GetDot(P);
+
+	// NOT CULLING
+	if(det > -EPSILON && det < EPSILON){
+		return false;
+	}
+
+	inv_det = 1.f / det;
+
+	// calculate distance from V1 to ray origin
+	T = O - V1;
+
+	// calculate u parameter and test bound
+	u = T.GetDot(P) * inv_det;
+
+	// the intersection lies outside of the triangle
+	if(u < 0.f || u > 1.f){
+		return false;
+	}
+
+	// prepare to test v parameter
+	Q = T.GetCrossed(e1);
+
+	// calculate V parameter and test bound
+	v = D.GetDot(Q) * inv_det;
+
+	// the intersection lies outside of the triangle
+	if(v < 0.f || u + v  > 1.f){
+		return false;
+	}
+
+	t = e2.GetDot(Q) * inv_det;
+
+	if(t > EPSILON){ // ray intersection
+		R = O + D * t; // store intersection point
+		return true;
+	}
+
+	// no hit, no win
+	return false;
+}
+
+// IsInsideMesh determines if a given point is inside of the base model mesh
+// Adapted from Amnon Owed's ofxPointInMesh::isInside: https://github.com/AmnonOwed/ofxPointInMesh
+bool IsInsideMesh(Vector &p) {
+    // if no mesh was provided, skip this test
+    if(baseModelFilename.empty()) {
+        return false;
+    }
+
+    Vector foundIntersection; // variable to store a single found intersection
+	vector<Vector> results;  // vector to store all found intersections
+	Vector randomDirection = Vector(0.1, 0.2, 0.3); // a random direction
+
+    // go over all the shapes in the mesh
+    for (size_t s = 0; s < baseModelShapes.size(); s++) {
+        size_t index_offset = 0;
+
+        // go over all the faces in the shape
+        for (size_t f = 0; f < baseModelShapes[s].mesh.num_face_vertices.size(); f++) {
+            unsigned int fv = baseModelShapes[s].mesh.num_face_vertices[f];
+            vector<Vector> vertices;
+
+            // collect the vertices
+            for (size_t v = 0; v < fv; v++) {
+                tinyobj::index_t idx = baseModelShapes[s].mesh.indices[index_offset + v];
+                tinyobj::real_t vx = baseModelAttrib.vertices[3*idx.vertex_index+0];
+                tinyobj::real_t vy = baseModelAttrib.vertices[3*idx.vertex_index+1];
+                tinyobj::real_t vz = baseModelAttrib.vertices[3*idx.vertex_index+2];
+                vertices.push_back(Vector(vx, vy, vz));
+            }
+
+            index_offset += fv;
+
+            // do a triangle-ray intersection on each face in the mesh
+            // store the intersection (if any) in the variable foundIntersection
+            if(IsIntersectingFace(vertices[0], vertices[1], vertices[2], p, randomDirection, foundIntersection)) {
+                // store all found intersections
+                results.push_back(foundIntersection);
+            }
+        }
+    }
+
+	// handle multiple mesh intersections at the same point (by removing duplicates)
+	vector<Vector> unique_results;
+	unique_copy(results.begin(), results.end(), back_inserter(unique_results));
+
+	// // determine if the point is inside or outside the mesh, based on the number of unique intersections
+	if(unique_results.size() % 2 == 1) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 // Model holds all of the particles and defines their behavior.
@@ -250,20 +379,23 @@ public:
             const int parent = Nearest(p);
             const double d = p.Distance(m_Points[parent]);
 
-            // check if close enough to join
-            if (d < m_AttractionDistance) {
-                if (!ShouldJoin(p, parent)) {
-                    // push particle away a bit
-                    p = Lerp(m_Points[parent], p, m_AttractionDistance + m_MinMoveDistance);
-                    continue;
+            // do not allow particle to stick when its inside of the base model mesh
+            if(!IsInsideMesh(p)) {
+                // check if close enough to join
+                if (d < m_AttractionDistance) {
+                    if (!ShouldJoin(p, parent)) {
+                        // push particle away a bit
+                        p = Lerp(m_Points[parent], p, m_AttractionDistance + m_MinMoveDistance);
+                        continue;
+                    }
+
+                    // adjust particle position in relation to its parent
+                    p = PlaceParticle(p, parent);
+
+                    // add the point
+                    Add(p, parent);
+                    return;
                 }
-
-                // adjust particle position in relation to its parent
-                p = PlaceParticle(p, parent);
-
-                // add the point
-                Add(p, parent);
-                return;
             }
 
             // move randomly
