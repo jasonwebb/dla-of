@@ -35,13 +35,9 @@ const int DefaultStubbornness = 0;
 const double DefaultStickiness = 1;
 
 // boost is used for its spatial index
-using BoostPoint = boost::geometry::model::point<
-    double, D, boost::geometry::cs::cartesian>;
-
+using BoostPoint = boost::geometry::model::point<double, D, boost::geometry::cs::cartesian>;
 using IndexValue = pair<BoostPoint, int>;
-
-using Index = boost::geometry::index::rtree<
-    IndexValue, boost::geometry::index::linear<4>>;
+using Index = boost::geometry::index::rtree<IndexValue, boost::geometry::index::linear<4>>;
 
 // Vector represents a point or a vector
 class Vector {
@@ -121,8 +117,7 @@ Vector Lerp(const Vector &a, const Vector &b, const double d) {
 
 // Random returns a uniformly distributed random number between lo and hi
 double Random(const double lo = 0, const double hi = 1) {
-    static thread_local mt19937 gen(
-        chrono::high_resolution_clock::now().time_since_epoch().count());
+    static thread_local mt19937 gen(chrono::high_resolution_clock::now().time_since_epoch().count());
     uniform_real_distribution<double> dist(lo, hi);
     return dist(gen);
 }
@@ -179,8 +174,7 @@ public:
         m_Points.push_back(p);
         m_Parents.push_back(parent);
         m_JoinAttempts.push_back(0);
-        m_BoundingRadius = max(
-            m_BoundingRadius, p.Length() + m_AttractionDistance);
+        m_BoundingRadius = max(m_BoundingRadius, p.Length() + m_AttractionDistance);
     }
 
     // Nearest returns the index of the particle nearest the specified point
@@ -244,8 +238,7 @@ public:
             if (d < m_AttractionDistance) {
                 if (!ShouldJoin(p, parent)) {
                     // push particle away a bit
-                    p = Lerp(m_Points[parent], p,
-                        m_AttractionDistance + m_MinMoveDistance);
+                    p = Lerp(m_Points[parent], p, m_AttractionDistance + m_MinMoveDistance);
                     continue;
                 }
 
@@ -258,8 +251,7 @@ public:
             }
 
             // move randomly
-            const double m = max(
-                m_MinMoveDistance, d - m_AttractionDistance);
+            const double m = max(m_MinMoveDistance, d - m_AttractionDistance);
             p += MotionVector(p).Normalized() * m;
 
             // check if particle is too far away, reset if so
