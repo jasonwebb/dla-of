@@ -279,7 +279,7 @@ public:
 
     // OutputPointData creates a new CSV file and fills it with most current point data
     void OutputPointData(const int iteration) const {
-        file.open(filename + "-" + to_string(iteration) + ".csv");
+        file.open("data/" + filename + "-" + to_string(iteration) + ".csv");
 
         for(unsigned int id = 0; id < m_Points.size(); id++) {
             file << id << "," << m_Parents[id] << "," << m_Points[id].X() << "," << m_Points[id].Y() << "," << m_Points[id].Z() << endl;
