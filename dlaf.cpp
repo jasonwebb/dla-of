@@ -316,12 +316,12 @@ private:
 };
 
 
-// create the model
+// create the model in global scope so that parseArgs can configure it
 Model model;
 
 
 // Parses CLI arguments and configures simulation with what is passed
-void parseArgs(int argc, char* argv[]) {
+void ParseArgs(int argc, char* argv[]) {
     try {
         cxxopts::Options options(argv[0]);
 
@@ -386,7 +386,7 @@ void parseArgs(int argc, char* argv[]) {
 
 int main(int argc, char* argv[]) {
     // parse the CLI arguments
-    parseArgs(argc, argv);
+    ParseArgs(argc, argv);
 
     // add seed point(s)
     model.Add(Vector());
