@@ -1,38 +1,13 @@
 # dlaf with models
 
-Based on [dlaf](https://github.com/fogleman/dlaf) by Michael Fogleman
+Extension of Michael Fogleman's [dlaf](https://github.com/fogleman/dlaf) that enables complex, large-scale DLA growth on 3D models.
 
-## Goal
-To grow large-scale (10M+ particle) DLA clusters on 3D models.
-
-## TODO
-- [ ] Rename repo (dlaf-on-models, dlaf-with-models, dlaf-for-models)
-- [X] Add parser for 3D models ([tinyobjloader](https://github.com/syoyo/tinyobjloader))
-- [X] Add collision detection between walkers and faces from 3D model
-- [X] Add ability to check if walker is inside a 3D model
-- [X] Create 3D model of cube
-- [ ] Create 3D model of faces selected from sub-divided cube to serve as seed points for clusters
-  - Use Meshmixer
-- [ ] Work out rendering pipeline.
-  - Look into Embree, Mitsuba, and OSPRay
-  - Look into higher-level interfaces like Houdini
-- [ ] Output color values for points based on mesh
-  - [ ] "Fade" colors out based on distance from model surface
-- [ ] Measure performance of updated algorithm (below).
-  - Based on results, look into "Dockerizing" the app and running it on AWS.
-- [X] Add DefaultBoundingRadius value, with CLI option
-- [X] Add progress bar, if feasible
-- [X] Implement periodic output of timestamped point data in order to create animations of growth process.
-- [X] Implement CLI flags
-  - [X] Particle count
-  - [X] Output file name
-  - [X] Frequency of point data output (in iterations)
-  - [X] Attraction distance
-  - [X] Particle spacing
-  - [X] Minimum move distance
-  - [X] Stubbornness
-  - [X] Stickiness
-  - [X] Bounding radius
+## Features
+* Fully configurable via command line interface
+* Periodic output of point cloud data so that growth animations can be created
+* Live updating progress bar so you know how far along the simulation is when running
+* Supports import of a manifold 3D model to inhibit growth of particles
+* Supports import of 3D model containing faces that particle clusters can grow on. You can have this model contain only some of the faces from the full 3D model to influence where clusters get started.
 
 ## Algorithm overview
 1. Load decimated 3D model that walkers will not be allowed to cluster inside of.
@@ -64,6 +39,11 @@ make
 3. Run the compiled application
 ```
 ./dlaf
+```
+
+**MacOS**
+```
+Can you provide install notes for Mac? Please let me know or open a PR with the README changes!
 ```
 
 ## Usage
@@ -117,3 +97,40 @@ Use one 3D model to inhibit growth (`-i`) and another containing faces to seed c
 ```
 ./dlaf -i base.obj -f faces.obj -r 400.0
 ```
+
+## Acknowledgements
+* [dlaf](https://github.com/fogleman/dlaf) by Michael Fogleman for blazingly-fast 2D/3D DLA implementation
+* [tinyobjloader](https://github.com/syoyo/tinyobjloader) by syoyo for parsing of OBJ files
+* [cxxopts](https://github.com/jarro2783/cxxopts) by jaroo2783 for easy cross-platform CLI option handling
+* [progress-cpp](https://github.com/prakhar1989/progress-cpp) by prakhar1989 for a CLI progress bar
+* Method for determining if a point is within a 3D mesh adapted from Amnon Owed's [ofxPointInMesh](https://github.com/AmnonOwed/ofxPointInMesh)
+* Method for computing point-triangle distance in 3D adapted from Íñigo Quílez's [distance to triangle](https://iquilezles.org/www/articles/triangledistance/triangledistance.htm) article
+
+## TODO
+- [X] Rename repo (dlaf-with-models)
+- [X] Add parser for 3D models ([tinyobjloader](https://github.com/syoyo/tinyobjloader))
+- [X] Add collision detection between walkers and faces from 3D model
+- [X] Add ability to check if walker is inside a 3D model
+- [X] Create 3D model of cube
+- [ ] Create 3D model of faces selected from sub-divided cube to serve as seed points for clusters
+  - Use Meshmixer
+- [ ] Work out rendering pipeline.
+  - Look into Embree, Mitsuba, and OSPRay
+  - Look into higher-level interfaces like Houdini
+- [ ] Output color values for points based on mesh
+  - [ ] "Fade" colors out based on distance from model surface
+- [ ] Measure performance of updated algorithm (below).
+  - Based on results, look into "Dockerizing" the app and running it on AWS.
+- [X] Add DefaultBoundingRadius value, with CLI option
+- [X] Add progress bar, if feasible
+- [X] Implement periodic output of timestamped point data in order to create animations of growth process.
+- [X] Implement CLI flags
+  - [X] Particle count
+  - [X] Output file name
+  - [X] Frequency of point data output (in iterations)
+  - [X] Attraction distance
+  - [X] Particle spacing
+  - [X] Minimum move distance
+  - [X] Stubbornness
+  - [X] Stickiness
+  - [X] Bounding radius
