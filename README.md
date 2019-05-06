@@ -78,6 +78,11 @@ The following arguments are available for configuring the simulation to your lik
 | `-r` | `--radius`       | Initial bounding radius                | `-r 10.0`       | 0                 |
 
 ### Examples
+Run simulation with all default parameters - 1000000 particles, output a single point data file at the end with the name `points-1000000.csv`, using a singe seed particle at the origin (no 3D models)
+```
+./dlaf
+```
+
 Use 1000 particles and output a point data file every 10 iterations.
 ```
 ./dlaf -p 1000 -n 10
@@ -111,9 +116,13 @@ Use one 3D model to inhibit growth (`-i`) and another containing faces to seed c
 - [X] Add parser for 3D models ([tinyobjloader](https://github.com/syoyo/tinyobjloader))
 - [X] Add collision detection between walkers and faces from 3D model
 - [X] Add ability to check if walker is inside a 3D model
-- [X] Create 3D model of cube
-- [ ] Create 3D model of faces selected from sub-divided cube to serve as seed points for clusters
-  - Use Meshmixer
+- [X] Create 3D models of various primitives at different scales for testing
+  - [X] Cube
+  - [X] Cone
+  - [X] Cylinder
+  - [X] Sphere
+  - [X] Pyramid
+  - [X] Torus
 - [ ] Work out rendering pipeline.
   - Look into Embree, Mitsuba, and OSPRay
   - Look into higher-level interfaces like Houdini
