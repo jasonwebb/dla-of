@@ -103,6 +103,36 @@ Use one 3D model to inhibit growth (`-i`) and another containing faces to seed c
 ./dlaf -i base.obj -f faces.obj -r 400.0
 ```
 
+### Performance
+
+Measured on my laptop with Intel Core i7-8750H CPU @ 2.20 GHz on Win10 64-bit.
+
+<table>
+ <thead>
+  <tr>
+   <th rowspan="2" valign="top">Shape</th>
+   <th colspan="5" align="center"><center>Time to simulate with ...</center></th>
+  </tr>
+  <tr>
+   <th>100</th>
+   <th>1,000</th>
+   <th>10,000</th>
+   <th>100,000</th>
+   <th>1,000,000</th>
+  </tr>
+ </thead>
+ <tbody>
+  <tr>
+   <td>Cube</td>
+   <td>0.02s</td>
+   <td>0.18s</td>
+   <td>2.0s</td>
+   <td>23.0s</td>
+   <td></td>
+  </tr>
+ </tbody>
+</table>
+
 ## Acknowledgements
 * [dlaf](https://github.com/fogleman/dlaf) by Michael Fogleman for blazingly-fast 2D/3D DLA implementation
 * [tinyobjloader](https://github.com/syoyo/tinyobjloader) by syoyo for parsing of OBJ files
@@ -128,7 +158,7 @@ Use one 3D model to inhibit growth (`-i`) and another containing faces to seed c
   - Look into higher-level interfaces like Houdini
 - [ ] Output color values for points based on mesh
   - [ ] "Fade" colors out based on distance from model surface
-- [ ] Measure performance of updated algorithm (below).
+- [ ] Measure performance of updated algorithm.
   - Based on results, look into "Dockerizing" the app and running it on AWS.
 - [X] Add DefaultBoundingRadius value, with CLI option
 - [X] Add progress bar, if feasible
