@@ -8,15 +8,15 @@
 #include <fstream>
 
 // using cxxopts for CLI argument parsing
-#include "cxxopts.hpp"
+#include "packages/cxxopts.hpp"
 
 // using prakhar1989's ProgressBar for CLI progress indicator
-#include "ProgressBar.hpp"
+#include "packages/ProgressBar.hpp"
 
 // using tinyobjloader for OBJ file parsing
 #define TINYOBJLOADER_IMPLEMENTATION
 #define EPSILON 0.00000001
-#include "tiny_obj_loader.h"
+#include "packages/tiny_obj_loader.h"
 
 using namespace std;
 
@@ -498,7 +498,7 @@ public:
                     p = PlaceParticle(p, parent);
 
                     // add the point
-                    Add(p, parent);
+                    Add(p);
                     return;
                 }
 
