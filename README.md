@@ -68,7 +68,7 @@ The following arguments are available for configuring the simulation to your lik
 | `-p` | `--particles`    | Number of walkers                      | `-p 10000`      | 1000000           |
 | `-i` | `--input`        | Filename of base 3D model              | `-i cube.obj`   | _None_            |
 | `-f` | `--faces`        | Filename of 3D model with seed faces   | `-f faces.obj`  | _None_            |
-| `-o` | `--output`       | Output file name                       | `-o output.csv` | `points.csv`      |
+| `-o` | `--output`       | Output file name                       | `-o output`     | `points`          |
 | `-n` | `--interval`     | Output point data every _n_ iterations | `-n 100`        | End of simulation |
 | `-s` | `--spacing`      | Particle spacing                       | `-s 2.0`        | 1                 |
 | `-a` | `--attraction`   | Attraction distance                    | `-a 5.0`        | 3                 |
@@ -78,14 +78,14 @@ The following arguments are available for configuring the simulation to your lik
 | `-r` | `--radius`       | Initial bounding radius                | `-r 10.0`       | 0                 |
 
 ### Examples
-Use 1000 particles and output a CSV file every 10 iterations.
+Use 1000 particles and output a point data file every 10 iterations.
 ```
 ./dlaf -p 1000 -n 10
 ```
 
-Use default particle count and output to custom CSV file
+Use default particle count and output to point data file with custom name
 ```
-./dlaf -o output.csv
+./dlaf -o output
 ```
 
 Use custom particle count and tweak several simulation parameters in various forms

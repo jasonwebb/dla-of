@@ -276,16 +276,16 @@ bool IsInsideMesh(Vector &p) {
         }
     }
 
-	// handle multiple mesh intersections at the same point (by removing duplicates)
-	vector<Vector> unique_results;
-	unique_copy(results.begin(), results.end(), back_inserter(unique_results));
+    // handle multiple mesh intersections at the same point (by removing duplicates)
+    vector<Vector> unique_results;
+    unique_copy(results.begin(), results.end(), back_inserter(unique_results));
 
-	// // determine if the point is inside or outside the mesh, based on the number of unique intersections
-	if(unique_results.size() % 2 == 1) {
-		return true;
-	} else {
-		return false;
-	}
+    // // determine if the point is inside or outside the mesh, based on the number of unique intersections
+    if(unique_results.size() % 2 == 1) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 // GetDot2 calculates the dot product of a vector with itself
@@ -523,7 +523,7 @@ public:
         }
     }
 
-    // OutputPointData creates a new CSV file and fills it with most current point data
+    // OutputPointData creates a new point data file and fills it with most current point data
     void OutputPointData(const int iteration) const {
         file.open("data/" + filename + "-" + to_string(iteration) + ".csv");
 
@@ -589,7 +589,7 @@ void ParseArgs(int argc, char* argv[]) {
             ("p,particles", "Number of walker particles", cxxopts::value<int>())
             ("i,input", "Full 3D model filename (.obj)", cxxopts::value<string>())
             ("f,faces", "Seed faces 3D model filename (.obj)", cxxopts::value<string>())
-            ("o,output", "Output filename", cxxopts::value<string>())
+            ("o,output", "Point data output filename", cxxopts::value<string>())
             ("n,interval", "Point data capture interval", cxxopts::value<int>())
             ("s,spacing", "Particle spacing", cxxopts::value<double>())
             ("a,attraction", "Attraction distance", cxxopts::value<double>())
@@ -629,17 +629,6 @@ void ParseArgs(int argc, char* argv[]) {
 
         if(result.count("output")) {
             filename = result["output"].as<string>();
-
-            // throw error when filename doesn't end in `.csv`
-            if(filename.substr(filename.length() - 4, filename.length() - 1).compare(".csv") != 0) {
-                cerr << "Output file must be a CSV file" << endl;
-                exit(1);
-            }
-
-            // trim the `.csv` extension (it'll be added by OutputPointData later)
-            for(int i = 0; i < 4; i++) {
-                filename.pop_back();
-            }
         }
 
         if(result.count("interval")) {
