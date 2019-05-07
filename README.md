@@ -78,7 +78,7 @@ The following arguments are available for configuring the simulation to your lik
 | `-r` | `--radius`       | Initial bounding radius                | `-r 10.0`       | 0                 |
 
 ### Examples
-Run simulation with all default parameters - 1000000 particles, output a single point data file at the end with the name `points-1000000.csv`, using a singe seed particle at the origin (no 3D models)
+Run simulation with all default parameters - 1,000,000 particles, output a single point data file at the end with the name `points-1000000.csv`, using a singe seed particle at the origin (no 3D models)
 ```
 ./dlaf
 ```
@@ -103,15 +103,16 @@ Use one 3D model to inhibit growth (`-i`) and another containing faces to seed c
 ./dlaf -i base.obj -f faces.obj -r 400.0
 ```
 
-### Performance
+## Performance
 
-Measured on my laptop with Intel Core i7-8750H CPU @ 2.20 GHz on Win10 64-bit.
+Measured on my laptop with Intel Core i7-8750H CPU @ 2.20 GHz running Win10 64-bit running Ubuntu 18.04 via [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 <table>
  <thead>
   <tr>
-   <th rowspan="2" valign="top">Shape</th>
-   <th colspan="5" align="center"><center>Time to simulate with ...</center></th>
+   <th rowspan="2" valign="bottom">Shape</th>
+   <th rowspan="2" valign="bottom">Triangle count</th>
+   <th colspan="5"><center>Time to simulate with particle count ...</center></th>
   </tr>
   <tr>
    <th>100</th>
@@ -123,11 +124,57 @@ Measured on my laptop with Intel Core i7-8750H CPU @ 2.20 GHz on Win10 64-bit.
  </thead>
  <tbody>
   <tr>
+   <td>Pyramid</td>
+   <td>4</td>
+   <td>0.01s</td>
+   <td>0.11s</td>
+   <td>1.3s</td>
+   <td>15s</td>
+   <td>200s</td>
+  </tr>
+  <tr>
    <td>Cube</td>
+   <td>12</td>
    <td>0.02s</td>
    <td>0.18s</td>
-   <td>2.0s</td>
-   <td>23.0s</td>
+   <td>2s</td>
+   <td>23s</td>
+   <td>270s</td>
+  </tr>
+  <tr>
+   <td>Cone</td>
+   <td>558</td>
+   <td>0.35s</td>
+   <td>4s</td>
+   <td>40s</td>
+   <td>370s</td>
+   <td></td>
+  </tr>
+  <tr>
+   <td>Cylinder</td>
+   <td>418</td>
+   <td>0.8s</td>
+   <td>7.5s</td>
+   <td>90s</td>
+   <td>915s</td>
+   <td></td>
+  </tr>
+  <tr>
+   <td>Sphere</td>
+   <td>4200</td>
+   <td>2.75s</td>
+   <td>26s</td>
+   <td>300s</td>
+   <td></td>
+   <td></td>
+  </tr>
+  <tr>
+   <td>Torus</td>
+   <td>1448</td>
+   <td>0.6s</td>
+   <td>8s</td>
+   <td>100s</td>
+   <td></td>
    <td></td>
   </tr>
  </tbody>
